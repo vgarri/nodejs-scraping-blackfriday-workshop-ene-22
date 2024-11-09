@@ -15,15 +15,13 @@ const extractProductData = async (url,browser) => {
 
         /********** A RELLENAR todos los page.$eval(selector, function)  *********/
         //titulo
-        //productData['name'] = await page.$eval(selector, function)
+        productData['name'] = await page.$eval('h1', name => name.innerHTML)//sacamos solo el innerHTML
         //precio
-        //productData['price'] = await page.$eval(selector, function)
+        productData['price'] = await page.$eval('div.product-details-prices > div > span', price => price.innerText)
         //imagenes
-        //productData['img'] = await page.$eval(selector, function)
-        //info
-        //productData['info'] = await page.$eval(selector, function)
+        productData['img'] = await page.$eval('figure > img', img=> img.src)
         //descripción
-        //productData['description'] = await page.$eval(selector, description=>description.innerText.slice(0,200) + '...')
+        productData['description'] = await page.$eval('div.productdetailinfocontainer', description=>description.innerText.slice(0,200) + '...')
         
         return productData // Devuelve los datos de un producto
     }
@@ -41,7 +39,7 @@ const scrap = async (url) => {
         const scrapedData = []
         // inicializamos una instancia del navegador (browser) con puppeteer.launch() y añadimos en el objeto de configuración la opción headless
         console.log("Opening the browser......");
-        const browser = await puppeteer.launch({headless:false})
+        const browser = await puppeteer.launch({headless:true})
 
         // Abrimos una nueva pestaña en el navegador creando una instancia con el método newPage() a la que llamaremos page
         const page = await browser.newPage();
@@ -55,14 +53,14 @@ const scrap = async (url) => {
         // En este caso , en el CB filtramos el array de items, guardando en un nuevo array
 
         /********** A RELLENAR page.$eval(selector, function)  *********/
-        //const tmpurls = await page.$$eval(selector,funcion)
+        const tmpurls = await page.$$eval('article > figure > a',link => link.map(a => a.href))
         
         //Quitamos los duplicados
         const urls = await tmpurls.filter((link,index) =>{ return tmpurls.indexOf(link) === index})
 
         console.log("url capuradas",urls)
         // Me quedo con los 20 primeros productos, porque sino es muy largo
-        const urls2 = urls.slice(0, 21);
+        const urls2 = urls.slice(0, 6);
 
         // Filtramos los productos
         // Extraemos el dato de cada producto
@@ -91,4 +89,4 @@ const scrap = async (url) => {
 exports.scrap = scrap;
 
 /********** DESCOMENTAR PARA PROBAR *********/
-//scrap("https://www.coolmod.com/novedades/").then(data =>console.log(data))
+scrap("https://www.coolmod.com/novedades/").then(data =>console.log(data))
